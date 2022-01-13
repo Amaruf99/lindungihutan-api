@@ -9,6 +9,11 @@ use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Response;
+
 class Handler extends ExceptionHandler
 {
     /**
@@ -49,6 +54,38 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        return parent::render($request, $exception);
+        if (env('APP_DEBUG')) {
+            return parent::render($request, $exception);
+        }
+
+        $status = Response::HTTP_INTERNAL_SERVER_ERROR;
+        if ($exception instanceof HttpResponseException) {
+            $status = Response::HTTP_INTERNAL_SERVER_ERROR;
+        } elseif ($exception instanceof MethodNotAllowedHttpException) {
+            $status = Response::HTTP_METHOD_NOT_ALLOWED;
+            $exception = new MethodNotAllowedHttpException([], 'HTTP_METHOD_NOT_ALLOWED', $exception);
+        } elseif ($exception instanceof NotFoundHttpException) {
+            $status = Response::HTTP_NOT_FOUND;
+            $exception = new NotFoundHttpException('HTTP_NOT_FOUND', $exception);
+        } elseif ($exception instanceof AuthorizationException) {
+            $status = $exception->getCode() == null ? Response::HTTP_FORBIDDEN : $exception->getCode();
+            $message = $exception->getMessage() == null ? 'HTTP_FORBIDDEN' : $exception->getMessage();
+            $exception = new AuthorizationException($message, $exception);
+        } elseif ($exception instanceof ValidationException) {
+            // $status = $exception->getCode() == null ? Response::HTTP_BAD_REQUEST : $exception->getCode();
+            // $exception = new ValidationException($message, $status, $exception);
+            $status = $exception->status;
+        } elseif ($exception) {
+            $exception = new HttpException($status, 'HTTP_INTERNAL_SERVER_ERROR');
+        }
+
+        $error = $exception->getMessage();
+        if ($exception instanceof ValidationException) {
+            $error = $exception->validator;
+        }
+        return response()->json([
+            'is_success' => false,
+            'error' => $error,
+        ], $status);
     }
 }

@@ -16,3 +16,10 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+$router->group(['prefix' => 'api'], function () use ($router) {
+    $router->group(['prefix' => 'authentication'], function () use ($router) {
+        $router->post('/registration', 'AuthController@register');
+        $router->post('/login', 'AuthController@login');
+    });
+});
