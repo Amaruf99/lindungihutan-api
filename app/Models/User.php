@@ -35,4 +35,14 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     {
         return [];
     }
+
+    public function hasRole($roles)
+    {
+        foreach ($roles as $role) {
+            if ($this->role == $role) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

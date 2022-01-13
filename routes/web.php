@@ -2,6 +2,8 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
+use Laravel\Lumen\Routing\Router;
+
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -21,5 +23,11 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->group(['prefix' => 'authentication'], function () use ($router) {
         $router->post('/registration', 'AuthController@register');
         $router->post('/login', 'AuthController@login');
+    });
+
+    $router->group(['middleware' => ['auth']], function () use ($router) {
+        $router->get('/tes', ['middleware' => 'role:admin,user', function () {
+            return 'TES';
+        }]);
     });
 });
