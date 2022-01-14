@@ -13,6 +13,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class Handler extends ExceptionHandler
 {
@@ -66,14 +67,17 @@ class Handler extends ExceptionHandler
             $exception = new MethodNotAllowedHttpException([], 'HTTP_METHOD_NOT_ALLOWED', $exception);
         } elseif ($exception instanceof NotFoundHttpException) {
             $status = Response::HTTP_NOT_FOUND;
-            $exception = new NotFoundHttpException('HTTP_NOT_FOUND', $exception);
+            $message = $exception->getMessage() == null ? 'HTTP_NOT_FOUND' : $exception->getMessage();
+            $exception = new NotFoundHttpException($message, $exception);
         } elseif ($exception instanceof AuthorizationException) {
             $status = $exception->getCode() == null ? Response::HTTP_FORBIDDEN : $exception->getCode();
             $message = $exception->getMessage() == null ? 'HTTP_FORBIDDEN' : $exception->getMessage();
             $exception = new AuthorizationException($message, $exception);
+        } elseif ($exception instanceof BadRequestException) {
+            $status = $exception->getCode() == null ? Response::HTTP_BAD_REQUEST : $exception->getCode();
+            $message = $exception->getMessage() == null ? 'HTTP_BAD_REQUEST' : $exception->getMessage();
+            $exception = new BadRequestException($message, $status, $exception);
         } elseif ($exception instanceof ValidationException) {
-            // $status = $exception->getCode() == null ? Response::HTTP_BAD_REQUEST : $exception->getCode();
-            // $exception = new ValidationException($message, $status, $exception);
             $status = $exception->status;
         } elseif ($exception) {
             $exception = new HttpException($status, 'HTTP_INTERNAL_SERVER_ERROR');

@@ -26,8 +26,15 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     });
 
     $router->group(['middleware' => ['auth']], function () use ($router) {
-        $router->get('/tes', ['middleware' => 'role:admin,user', function () {
-            return 'TES';
-        }]);
+        // $router->get('/tes', ['middleware' => 'role:admin,user', function () {
+        //     return 'TES';
+        // }]);
+        $router->group(['prefix' => 'users'], function () use ($router) {
+            $router->get('/', ['middleware' => 'role:superadmin,admin', 'uses' => 'UserController@index']);
+            $router->get('/{id}', ['middleware' => 'role:superadmin,admin,user', 'uses' => 'UserController@show']);
+            $router->post('/create', ['middleware' => 'role:superadmin,admin,user', 'uses' => 'UserController@create']);
+            $router->put('/{id}', ['middleware' => 'role:superadmin,admin,user', 'uses' => 'UserController@update']);
+            $router->delete('/{id}', ['middleware' => 'role:superadmin,admin', 'uses' => 'UserController@destroy']);
+        });
     });
 });
