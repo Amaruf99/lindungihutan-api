@@ -114,4 +114,15 @@ $app->router->group([
     require __DIR__.'/../routes/web.php';
 });
 
+Cloudinary\Configuration\Configuration::instance([
+    'cloud' => [
+        'cloud_name' => env('CLOUDINARY_CLOUD_NAME', true),
+        'api_key' => env('CLOUDINARY_API_KEY', true), 
+        'api_secret' => env('CLOUDINARY_API_SECRET', true)
+    ],
+    'url' => [
+        'secure' => true
+    ]
+]);
+
 return $app;

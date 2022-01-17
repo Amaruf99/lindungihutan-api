@@ -47,6 +47,7 @@ $router->group(['prefix' => 'api'], function () use ($router) {
             $router->post('/', ['middleware' => 'role:user', 'uses' => 'CampaignController@store']);
             $router->put('/{id}', ['middleware' => 'role:user', 'uses' => 'CampaignController@update']);
             $router->delete('/{id}', ['middleware' => 'role:superadmin,admin,user', 'uses' => 'CampaignController@destroy']);
+            $router->post('/upload', ['middleware' => 'role:superadmin,admin,user', 'uses' => 'FileUploadController@index']);
         });
 
         $router->group(['prefix' => 'donations'], function () use ($router) {
