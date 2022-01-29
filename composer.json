@@ -7,6 +7,8 @@
     "require": {
         "php": "^7.3|^8.0",
         "cloudinary/cloudinary_php": "^2.6",
+        "flipbox/lumen-generator": "^8.2",
+        "illuminate/mail": "^8.80",
         "laravel/lumen-framework": "^8.3.1",
         "tymon/jwt-auth": "dev-develop"
     },

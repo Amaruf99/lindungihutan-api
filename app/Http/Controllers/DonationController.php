@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\DonationPayment;
 use App\Models\Campaign;
 use App\Models\Donation;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Illuminate\Validation\ValidationException;
@@ -91,6 +93,11 @@ class DonationController extends Controller
             if ($authenticatedUser->id != $input['user_id']) {
                 throw new BadRequestException();
             }
+            $donorEmail = $authenticatedUser->email;
+            $donorName = $authenticatedUser->fullname;
+        }else {
+            $donorEmail = $input['email'];
+            $donorName = $input['name'];
         }
 
         $campaign = Campaign::find($input['campaign_id']);
@@ -99,6 +106,7 @@ class DonationController extends Controller
         }
 
         $donation = Donation::create($input);
+        Mail::to($donorEmail)->send(new DonationPayment($donorEmail, $donorName, $input['amount']));
 
         return response()->json([
             'is_success' => true,
